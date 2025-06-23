@@ -1,6 +1,6 @@
-# deployments/dockerfiles/order-service.Dockerfile
+# deployments/dockerfiles/catalog-service.Dockerfile
 
-FROM python:3.9-slim-buster
+FROM python:3.10-slim-buster
 
 WORKDIR /app
 COPY requirements.txt .
@@ -14,10 +14,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
-EXPOSE 5004
+EXPOSE 5003
 
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=5004
+ENV FLASK_RUN_PORT=5003
 
 CMD ["python", "app.py"]

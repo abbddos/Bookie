@@ -1,9 +1,12 @@
-# deployments/dockerfiles/catalog-service.Dockerfile
+# deployments/dockerfiles/user-service.Dockerfile
 
-FROM python:3.9-slim-buster
+FROM python:3.10-slim-buster
 
 WORKDIR /app
 COPY requirements.txt .
+# Install Python dependencies.
+# Pillow needs build essentials, so we install them before pip.
+# CORRECTED: Changed 'apt get-install' to 'apt-get install'
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libjpeg-dev \
@@ -14,10 +17,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
-EXPOSE 5003
+EXPOSE 5002
 
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=5003
+ENV FLASK_RUN_PORT=5002
 
 CMD ["python", "app.py"]

@@ -11,7 +11,7 @@ class Config:
     CORS_ORIGINS = ["http://localhost:3000"] # Adjust if your frontend runs on a different port/domain
 
     # Secret key for signing password reset and email verification tokens
-    SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT') or 'another_secret_salt_for_password_reset'
+    SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT')
     # Expiry time for password reset tokens (e.g., 1 hour = 3600 seconds)
     PASSWORD_RESET_TOKEN_EXPIRATION = 3600
     # Expiry time for email verification tokens (e.g., 24 hours = 86400 seconds)

@@ -1,0 +1,121 @@
+# deployments/docker-compose/docker-compose.yml
+# This file defines how to build and run your microservices locally using Docker Compose.
+
+version: '3.8' # Specify the Docker Compose file format version
+
+services:
+  # --- User Service ---
+  user-service:
+    build:
+      context: ../../user-service # Path from docker-compose.yml to the user-service directory
+      dockerfile: Dockerfile      # Name of the Dockerfile within user-service/
+    ports:
+      - "5002:5002" 
+    volumes:
+      - user_db_data:/app/users.db # Persist user-service's SQLite database
+      - ../../user-service:/app    # Mount for live code changes (DEV ONLY)
+    environment:
+      SECRET_KEY: ${USER_SERVICE_SECRET_KEY} 
+      SECURITY_PASSWORD_SALT: ${USER_SERVICE_PASSWORD_SALT}
+      UPLOAD_FOLDER: /app/static/profile_pics 
+    networks:
+      - microservices_network
+
+  # --- Catalog Service ---
+  catalog-service:
+    build:
+      context: ../../catalog-service # Path from docker-compose.yml to the catalog-service directory
+      dockerfile: Dockerfile      # Name of the Dockerfile within catalog-service/
+    ports:
+      - "5003:5003"
+    volumes:
+      - catalog_db_data:/app/books.db # Persist catalog-service's SQLite database
+      - ../../catalog-service:/app    # Mount for live code changes (DEV ONLY)
+    environment:
+      SECRET_KEY: ${CATALOG_SERVICE_SECRET_KEY}
+      UPLOAD_FOLDER: /app/static/cover_images # Profile picture upload directory (relative to /app, which is WORKDIR)
+    networks:
+      - microservices_network
+
+  # --- Order Service ---
+  order-service:
+    build:
+      context: ../../order-service # Path from docker-compose.yml to the order-service directory
+      dockerfile: Dockerfile      # Name of the Dockerfile within order-service/
+    ports:
+      - "5004:5004"
+    volumes:
+      - order_db_data:/app/orders.db  # Persist order-service's SQLite database
+      - ../../order-service:/app      # Mount for live code changes (DEV ONLY)
+    environment:
+      SECRET_KEY: ${ORDER_SERVICE_SECRET_KEY}
+    networks:
+      - microservices_network
+    depends_on: # Ensure user-service and catalog-service are up before order-service
+      - user-service
+      - catalog-service
+
+  # --- Payment Service ---
+  payment-service:
+    build:
+      context: ../../payment-service # Path from docker-compose.yml to the payment-service directory
+      dockerfile: Dockerfile      # Name of the Dockerfile within payment-service/
+    ports:
+      - "5005:5005"
+    volumes:
+      - payment_db_data:/app/payments.db # Persist payment-service's SQLite database
+      - ../../payment-service:/app       # Mount for live code changes (DEV ONLY)
+    environment:
+      SECRET_KEY: ${PAYMENT_SERVICE_SECRET_KEY}
+    networks:
+      - microservices_network
+    depends_on: # Ensure order-service is up before payment-service (as payments are tied to orders)
+      - order-service
+
+  # --- API Gateway ---
+  api-gateway:
+    build:
+      context: ../../api-gateway # Path from docker-compose.yml to the api-gateway directory
+      dockerfile: Dockerfile      # Name of the Dockerfile within api-gateway/
+    ports:
+      - "5000:5000" # Expose API Gateway to host
+    volumes:
+      - ../../api-gateway:/app    # Mount for live code changes (DEV ONLY)
+    environment:
+      API_GATEWAY_PORT: 5000
+      USER_SERVICE_URL: http://user-service:5002 # Internal Docker network hostname
+      CATALOG_SERVICE_URL: http://catalog-service:5003 # Internal Docker network hostname
+      ORDER_SERVICE_URL: http://order-service:5004   # Internal Docker network hostname
+      PAYMENT_SERVICE_URL: http://payment-service:5005 # Internal Docker network hostname
+      SECRET_KEY: ${API_GATEWAY_SECRET_KEY}
+      JWT_SECRET_KEY: ${API_GATEWAY_JWT_SECRET_KEY}
+      MAIL_SERVER: ${MAIL_SERVER}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USE_TLS: ${MAIL_USE_TLS}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_DEFAULT_SENDER: ${MAIL_DEFAULT_SENDER}
+      EMAIL_VERIFICATION_TOKEN_EXPIRATION: ${EMAIL_VERIFICATION_TOKEN_EXPIRATION}
+      FRONTEND_VERIFICATION_SUCCESS_URL: ${FRONTEND_VERIFICATION_SUCCESS_URL}
+      FRONTEND_VERIFICATION_FAILURE_URL: ${FRONTEND_VERIFICATION_FAILURE_URL}
+    networks:
+      - microservices_network
+    depends_on: # Ensure all backend services are up before the gateway
+      - user-service
+      - catalog-service
+      - order-service
+      - payment-service
+
+# Define named volumes for data persistence.
+# These volumes are managed by Docker and store data outside the container's filesystem,
+# allowing data to persist even if containers are removed.
+volumes:
+  user_db_data:
+  catalog_db_data:
+  order_db_data:
+  payment_db_data:
+
+# Define the custom network shared by all microservices.
+networks:
+  microservices_network:
+    driver: bridge # The default network driver, suitable for single-host communication
