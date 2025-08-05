@@ -1,7 +1,7 @@
 # deployments/docker-compose/docker-compose.yml
 # This file defines how to build and run your microservices locally using Docker Compose.
 
-version: '3.8' # Specify the Docker Compose file format version
+#version: '3.8' # Specify the Docker Compose file format version
 
 services:
   # --- User Service ---
@@ -12,8 +12,8 @@ services:
     ports:
       - "5002:5002" 
     volumes:
-      - user_db_data:/app/users.db # Persist user-service's SQLite database
-      - ../../user-service:/app    # Mount for live code changes (DEV ONLY)
+      - user_db_data:/app/data 
+      - ../../user-service:/app r live code changes (DEV ONLY)
     environment:
       SECRET_KEY: ${USER_SERVICE_SECRET_KEY} 
       SECURITY_PASSWORD_SALT: ${USER_SERVICE_PASSWORD_SALT}
@@ -29,8 +29,8 @@ services:
     ports:
       - "5003:5003"
     volumes:
-      - catalog_db_data:/app/books.db # Persist catalog-service's SQLite database
-      - ../../catalog-service:/app    # Mount for live code changes (DEV ONLY)
+      - catalog_db_data:/app/data 
+      - ../../catalog-service:/app
     environment:
       SECRET_KEY: ${CATALOG_SERVICE_SECRET_KEY}
       UPLOAD_FOLDER: /app/static/cover_images # Profile picture upload directory (relative to /app, which is WORKDIR)
@@ -45,8 +45,8 @@ services:
     ports:
       - "5004:5004"
     volumes:
-      - order_db_data:/app/orders.db  # Persist order-service's SQLite database
-      - ../../order-service:/app      # Mount for live code changes (DEV ONLY)
+      - order_db_data:/app/data  
+      - ../../order-service:/app
     environment:
       SECRET_KEY: ${ORDER_SERVICE_SECRET_KEY}
     networks:
@@ -63,8 +63,8 @@ services:
     ports:
       - "5005:5005"
     volumes:
-      - payment_db_data:/app/payments.db # Persist payment-service's SQLite database
-      - ../../payment-service:/app       # Mount for live code changes (DEV ONLY)
+      - payment_db_data:/app/data 
+      - ../../payment-service:/app
     environment:
       SECRET_KEY: ${PAYMENT_SERVICE_SECRET_KEY}
     networks:

@@ -3,6 +3,7 @@ from flask_cors import CORS
 import requests # For making HTTP requests to other microservices
 from flask_jwt_extended import JWTManager # For JWT handling
 from flask_mail import Mail # Import Mail
+import json
 
 from config import Config # Import our configuration
 
@@ -13,6 +14,9 @@ CORS(app, resources={r"/*": {"origins": Config.CORS_ORIGINS}})
 
 # Configure Flask app with settings from Config object
 app.config.from_object(Config)
+
+app.json_encoder = json.JSONEncoder
+
 
 # Initialize JWTManager with the app
 jwt = JWTManager(app)
