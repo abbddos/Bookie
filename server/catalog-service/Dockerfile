@@ -1,6 +1,6 @@
 # deployments/dockerfiles/catalog-service.Dockerfile
 
-FROM python:3.10-slim-buster
+FROM python:3.10-slim-bookworm
 
 WORKDIR /app
 COPY requirements.txt .

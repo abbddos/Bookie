@@ -4,7 +4,7 @@ class Config:
     # Get the base directory of the project
     BASEDIR = os.path.abspath(os.path.dirname(__file__))
     # Define the SQLite database URI. It will create `users.db` in the user-service directory.
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///data/users.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASEDIR, 'users.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False # Suppress warning
     SECRET_KEY = 'thisisasecretkeyforsomereasonidonotlikeatall'
     # Allow CORS from the frontend application's development server
